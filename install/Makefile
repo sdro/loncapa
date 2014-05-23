@@ -29,7 +29,7 @@ all: default
 default: 
 	@echo "Please read the documentation"
 
-install: init-database
+install: init-dirs install-files 
 
 init-database: 
 	createdb $(DBNAME)
