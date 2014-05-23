@@ -1,5 +1,7 @@
 
 DBNAME = loncapa
+DBUSER = loncapa
+
 INSTALL = /usr/bin/install
 
 LC_USER = apache
@@ -30,11 +32,12 @@ all: default
 default: 
 	@echo "Please read the documentation"
 
-install: init-dirs install-files 
+install: init-dirs install-files init-database
 
 init-database: 
-	createdb $(DBNAME)
-	psql $(DBNAME) -f relations.sql
+	createuser -S -D -R -e $(DBUSER)
+	createdb -O loncapa -e $(DBNAME)
+	psql $(DBNAME) loncapa -f relations.sql
 
 init-dirs:
 	$(INSTALL) -m 755 -o $(LC_USER) -g $(LC_GROUP) -d $(DESTDIR)/$(LC_CERTS_PATH)
@@ -91,6 +94,33 @@ clean-database:
 clean-dirs:
 	rm -rf $(DESTDIR)
 	rm -rf $(HTTPD_LIBS_PATH)
+
+#targets named dev-* are not considered end-user ready
+dev-install: dev-install-yum-dep dev-install-cpan-dep dev-config-db dev-config-services dev-start-services
+
+dev-install-yum-dep:
+	yum -y install man ntp httpd openssl-devel mod_ssl mod_perl postgresql \
+		postgresql-server perl-DBD-Pg memcached perl-CPAN gcc
+	chkconfig httpd on
+	$(INSTALL) -m 644 mongodb.repo /etc/yum.repos.d/
+	yum install mongo-10gen mongo-10gen-server
+
+dev-install-cpan-dep:
+	PERL_MM_USE_DEFAULT=1 cpan Bundle::LONCAPA
+
+dev-start-services:
+	service memcached start
+	service postgresql start 
+	service mongod start
+
+dev-config-services:
+	chkconfig postgresql on
+	chkconfig mongod on
+	chkconfig memcached on
+
+dev-config-db: 
+	$(INSTALL) -m 600 -o postgres -u postgres /var/lib/pgsql/data/
+	service postgresql initdb
 
 .PHONY: install init-database init-dirs install-files install-libs install-static install-conf clean clean-database clean-dirs
 	

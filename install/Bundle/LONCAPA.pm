@@ -16,17 +16,37 @@ This is used by make.
 
 =head1 CONTENTS
 
+Net::SSL
+
+Net::SSLeay
+
 IO::Socket:SSL
 
 LWP::Protocol::https
 
-Net::SSLeay
+ExtUtils::Config
+
+ExtUtils::Helpers
+
+ExtUtils::InstallPaths
+
+TAP::Harness::Env
+
+Module::Build::Tiny 
+
+Test::Warnings 
+
+DateTime
+
+DateTime::TimeZone
+
+DateTime::Format::RFC3339
 
 Safe
 
-MongoDB
-
 Safe::Hole
+
+MongoDB
 
 CGI::Cookie
 
@@ -46,8 +66,6 @@ Data::Uniqid
 
 Time::y2038
 
-DateTime::Format::RFC3339
-
 Digest::MD5
 
 File::Util
@@ -55,14 +73,6 @@ File::Util
 File::Touch
 
 JSON::DWIW
-
-Net::SSL
-
-DateTime
-
-DateTime::TimeZone
-
-DateTime::Format::RFC3339
 
 Hash::Merge
 
