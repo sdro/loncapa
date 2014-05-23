@@ -24,6 +24,7 @@ HTTPD_SCRIPTS_PATH = $(HTTPD_HTML_PATH)/scripts
 
 #TODO verify permissions are correct
 #TODO replace cp with install
+#TODO packages that need to be installed: httpd
 all: default
 	
 default: 
@@ -65,7 +66,7 @@ install-libs:
 install-static:
 	[ -d $(HTTPD_HTML_PATH) ] || $(INSTALL) -m 755 -o $(LC_USER) -g $(LC_GROUP) -d $(HTTPD_HTML_PATH) 
 	cp ../app/favicon.ico $(HTTPD_HTML_PATH)
-	cp ../html/*.html $(HTTPD_HTML_PATH)
+	cp ../app/html/*.html $(HTTPD_HTML_PATH)
 	[ -d $(HTTPD_IMAGES_PATH) ] || $(INSTALL) -m 755 -o $(LC_USER) -g $(LC_GROUP) -d $(HTTPD_IMAGES_PATH) 
 	cp ../app/images/* $(HTTPD_IMAGES_PATH)
 	[ -d $(HTTPD_SCRIPTS_PATH) ] || $(INSTALL) -m 755 -o $(LC_USER) -g $(LC_GROUP) -d $(HTTPD_SCRIPTS_PATH) 
