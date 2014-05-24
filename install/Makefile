@@ -106,6 +106,7 @@ dev-install-yum-dep:
 	yum install mongo-10gen mongo-10gen-server
 
 dev-install-cpan-dep:
+	PERL_MM_USE_DEFAULT=1 cpan Bundle::CPAN
 	PERL_MM_USE_DEFAULT=1 cpan Bundle::LONCAPA
 
 dev-start-services:
