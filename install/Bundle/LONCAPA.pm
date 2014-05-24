@@ -16,74 +16,59 @@ This is used by make.
 
 =head1 CONTENTS
 
-Net::SSL
+M/MI/MIKEM/Net-SSLeay-1.63.tar.gz
 
-Net::SSLeay
+N/NA/NANIS/Crypt-SSLeay-0.72.tar.gz
 
-IO::Socket:SSL
+S/SU/SULLR/IO-Socket-SSL-1.989.tar.gz
 
-LWP::Protocol::https
+M/MS/MSCHILLI/LWP-Protocol-https-6.06.tar.gz
 
-Test::More
+R/RG/RGARCIA/Safe-2.35.tar.gz
 
-Test::Warnings 
+T/TO/TODDR/Safe-Hole-0.13.tar.gz
 
-ExtUtils::Config
+F/FR/FRIEDO/MongoDB-0.702.2.tar.gz
 
-ExtUtils::Helpers
+L/LE/LEEJO/CGI.pm-4.00.tar.gz
 
-ExtUtils::InstallPaths
+S/SH/SHLOMIF/Math-Cephes-0.5304.tar.gz
 
-TAP::Harness::Env
+G/GR/GROMMEL/Math-Random-0.71.tar.gz
 
-Module::Build::Tiny 
+D/DO/DORMANDO/Cache-Memcached-1.30.tar.gz
 
-DateTime
+T/TO/TODDR/Locale-Maketext-1.25.tar.gz
 
-DateTime::TimeZone
+M/MC/MCHING/Lingua-Bork-0.03.tar.gz
 
-DateTime::Format::RFC3339
+P/PU/PUERCOMAL/Lingua-PigLatin-0.01.tar.gz
 
-Safe
+M/MW/MWX/Data-Uniqid-0.12.tar.gz
 
-Safe::Hole
+M/MS/MSCHWERN/Time-y2038-20100403.tar.gz
 
-MongoDB
+D/DR/DROLSKY/DateTime-1.10.tar.gz
 
-CGI::Cookie
+D/DR/DROLSKY/DateTime-TimeZone-1.69.tar.gz
 
-Math::Cephes
+I/IK/IKEGAMI/DateTime-Format-RFC3339-v1.0.5.tar.gz
 
-Math::Random
+G/GA/GAAS/Digest-MD5-2.53.tar.gz
 
-Cache::Memcached
+T/TO/TOMMY/File-Util-4.132140.tar.gz
 
-Locale::Maketext
+N/NE/NEILB/File-Touch-0.09.tar.gz
 
-Lingua::Bork
+D/DO/DOWENS/JSON-DWIW-0.47.tar.gz
 
-Lingua::PigLatin
+R/RE/REHSACK/Hash-Merge-0.200.tar.gz
 
-Data::Uniqid
+D/DM/DMOW/Spreadsheet-XLSX-0.13-withoutworldwriteables.tar.gz
 
-Time::y2038
+D/DO/DOUGW/Spreadsheet-ParseExcel-0.65.tar.gz
 
-Digest::MD5
-
-File::Util
-
-File::Touch
-
-JSON::DWIW
-
-Hash::Merge
-
-Spreadsheet::XLSX
-
-Spreadsheet::ParseExcel
-
-Text::CSV_PP
-
+M/MA/MAKAMAKA/Text-CSV-1.32.tar.gz
 
 =head1 CONFIGURATION
 
