@@ -24,6 +24,10 @@ IO::Socket:SSL
 
 LWP::Protocol::https
 
+Test::More
+
+Test::Warnings 
+
 ExtUtils::Config
 
 ExtUtils::Helpers
@@ -33,8 +37,6 @@ ExtUtils::InstallPaths
 TAP::Harness::Env
 
 Module::Build::Tiny 
-
-Test::Warnings 
 
 DateTime
 
