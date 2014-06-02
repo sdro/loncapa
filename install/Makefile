@@ -2,10 +2,11 @@
 DBNAME = loncapa
 DBUSER = loncapa
 
-INSTALL = /usr/bin/install
-
 LC_USER = apache
 LC_GROUP = apache
+
+INSTALL = /usr/bin/install
+CREATEUSER = 
 
 DESTDIR = /home/loncapa
 LC_CERTS_PATH = certs
@@ -23,6 +24,7 @@ HTTPD_LOCALIZE_PATH = $(HTTPD_LIBS_PATH)/lc_localize
 HTTPD_HTML_PATH = $(HTTPD_PATH)/html
 HTTPD_IMAGES_PATH = $(HTTPD_HTML_PATH)/images
 HTTPD_SCRIPTS_PATH = $(HTTPD_HTML_PATH)/scripts
+HTTPD_CSS_PATH = $(HTTPD_HTML_PATH)/css
 
 #TODO verify permissions are correct
 #TODO replace cp with install
@@ -74,10 +76,16 @@ install-static:
 	cp ../app/images/* $(HTTPD_IMAGES_PATH)
 	[ -d $(HTTPD_SCRIPTS_PATH) ] || $(INSTALL) -m 755 -o $(LC_USER) -g $(LC_GROUP) -d $(HTTPD_SCRIPTS_PATH) 
 	-(cd app/scripts && find . -type d -print) | while read dir; do \
-		$(INSTALL) -m 755 -d "$(HTTPD_SCRIPTS_PATH)/$$dir"; \
+		$(INSTALL) -m 755 -o $(LC_USER) -g $(LC_GROUP) -d "$(HTTPD_SCRIPTS_PATH)/$$dir"; \
 	done
 	-(cd app/scripts && find . -type f -print) | while read file; do \
-		$(INSTALL) -m 755 "app/scripts/$$file" "$(HTTPD_SCRIPTS_PATH)/$$file"; \
+		$(INSTALL) -m 755 -o $(LC_USER) -g $(LC_GROUP) "app/scripts/$$file" "$(HTTPD_SCRIPTS_PATH)/$$file"; \
+	done
+	-(cd app/css && find . -type d -print) | while read dir; do \
+		$(INSTALL) -m 755 -o $(LC_USER) -g $(LC_GROUP) -d "$(HTTPD_CSS_PATH)/$$dir"; \
+	done
+	-(cd app/css && find . -type f -print) | while read file; do \
+		$(INSTALL) -m 755 -o $(LC_USER) -g $(LC_GROUP) "app/css/$$file" "$(HTTPD_CSS_PATH)/$$file"; \
 	done
 
 install-conf:
@@ -96,7 +104,7 @@ clean-dirs:
 	rm -rf $(HTTPD_LIBS_PATH)
 
 #targets named dev-* are not considered end-user ready
-dev-install: dev-install-yum-dep dev-install-cpan-dep dev-config-db dev-config-services dev-start-services
+dev-install: dev-install-yum-dep dev-install-cpan-dep dev-config-db dev-config-services dev-start-services dev-verify-install
 
 dev-install-yum-dep:
 	yum -y install man ntp httpd openssl-devel mod_ssl mod_perl postgresql \
@@ -106,8 +114,8 @@ dev-install-yum-dep:
 	yum install mongo-10gen mongo-10gen-server
 
 dev-install-cpan-dep:
-	PERL_MM_USE_DEFAULT=1 cpan Bundle::CPAN
-	PERL_MM_USE_DEFAULT=1 cpan Bundle::LONCAPA
+	-PERL_MM_USE_DEFAULT=1 cpan Bundle::CPAN
+	-PERL_MM_USE_DEFAULT=1 cpan Bundle::LONCAPA
 
 dev-start-services:
 	service memcached start
@@ -115,6 +123,8 @@ dev-start-services:
 	service mongod start
 
 dev-config-services:
+	Setenforce 0 #TODO provide policy for SELinux
+	sed -i 's/^SELINUX=.*/SELINUX=disabled/g' /etc/sysconfig/selinux
 	chkconfig postgresql on
 	chkconfig mongod on
 	chkconfig memcached on
@@ -123,5 +133,11 @@ dev-config-db:
 	$(INSTALL) -m 600 -o postgres -u postgres /var/lib/pgsql/data/
 	service postgresql initdb
 
-.PHONY: install init-database init-dirs install-files install-libs install-static install-conf clean clean-database clean-dirs
+dev-verify-install:
+	@echo "TODO implement verification of installation"
+
+.PHONY: install init-database init-dirs install-files install-libs \
+	install-static install-conf clean clean-database clean-dirs \
+	dev-install dev-install-yum-dep dev-install-cpan-dep \
+	dev-start-services dev-config-db dev-verify-install
 	
