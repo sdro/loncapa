@@ -6,33 +6,36 @@ CREATE TABLE urls (
 CREATE TABLE userlookup (
     username text NOT NULL, 
     domain text NOT NULL, 
-    entity text PRIMARY KEY, 
+    entity text NOT NULL, 
+    PRIMARY KEY (entity, domain),
     UNIQUE (username, domain)
 );
 
 CREATE TABLE pidlookup (
     pid text NOT NULL, 
     domain text NOT NULL, 
-    entity text PRIMARY KEY, 
+    entity text NOT NULL, 
+    PRIMARY KEY (entity, domain),
     UNIQUE (pid, domain)
 );
 
 CREATE TABLE courselookup (
     courseid text NOT NULL, 
     domain text NOT NULL, 
-    entity text PRIMARY KEY, 
+    entity text NOT NULL,
+    PRIMARY KEY (entity, domain), 
     UNIQUE (courseid, domain)
 );
 
 CREATE TABLE homeserverlookup (
-    entity text PRIMARY KEY, 
+    entity text NOT NULL, 
     domain text NOT NULL,
     homeserver text NOT NULL, 
-    UNIQUE (entity, domain)
+    PRIMARY KEY (entity, domain)
 );
 
 CREATE TABLE rolelist (
-    roleentity text PRIMARY KEY, 
+    roleentity text NOT NULL, 
     roledomain text, 
     rolesection text,
     userentity text NOT NULL, 
@@ -42,12 +45,13 @@ CREATE TABLE rolelist (
     enddate timestamp, 
     manualenrollentity text,
     manualenrolldomain text, 
+    PRIMARY KEY (roleentity, roledomain),
     UNIQUE (roleentity, roledomain, rolesection, userentity, userdomain,
         role)
 );
 
 CREATE TABLE assessments (
-    courseentity text PRIMARY KEY, 
+    courseentity text NOT NULL, 
     coursedomain text NOT NULL, 
     userentity text NOT NULL, 
     userdomain text NOT NULL, 
@@ -59,6 +63,6 @@ CREATE TABLE assessments (
     countedtries text, 
     status text, 
     responsedetailsjson text, 
-    UNIQUE (courseentity, coursedomain, userentity, userdomain, 
+    PRIMARY KEY (courseentity, coursedomain, userentity, userdomain, 
         resourceid, partid)
 );
