@@ -61,7 +61,7 @@ sub start_lcform_html {
 # Actually start the form
    return '<form class="lcform" id="'.$id.'" name="'.$name.'"'.
    ($screendefaults?' onsubmit="screendefaults(\''.$id."','".$screendefaults.'\')"':'').
-   '><input type="hidden" id="postdata" name="postdata" value="" />';
+   '>'.&hidden_field('postdata','');
 }
 
 sub end_lcform_html {
@@ -149,19 +149,49 @@ sub inputfield {
       return &selectfield($id,$name,$timezones,$timezones,$default);
    } elsif ($type eq 'datetime') {
 #FIXME: y2038?
+      unless ($default) { 
+         if (($screen_form_defaults->{$id.'_name'}) && ($screen_form_defaults->{$id.'_time_zone'})) {
+            $default=&Apache::lc_ui_localize::inputdate_to_timestamp(
+                  $screen_form_defaults->{$id.'_name'},
+                  $screen_form_defaults->{$id.'_time_hour'},
+                  $screen_form_defaults->{$id.'_time_min'},
+                  $screen_form_defaults->{$id.'_time_sec'},
+                  $screen_form_defaults->{$id.'_time_ampm'},
+                  $screen_form_defaults->{$id.'_time_zone'});
+         }
+      }
       unless ($default) { $default=time; }
       return &datetimefield($id,$name,$default);
    } elsif ($type eq 'modifiablecourseroles') {
       my ($role_short,$role_name)=&modifiable_role_choices('course');
       return &selectfield($id,$name,$role_short,$role_name,$default);
+   } elsif ($type eq 'symbolic') {
+      return &maxima_editor($id,$name,'symbolic',$default);
+   } elsif ($type eq 'numeric') {
+      return &maxima_editor($id,$name,'numerical',$default);
    }
+}
+
+# ==== Bring up a MAXIMA editor field
+# 
+sub maxima_editor {
+   my ($id,$name,$mode,$default)=@_;
+   unless ($name) {
+      $name=$id;
+   }
+   my $output='<div class="eqnbox">';
+   $output.='<textarea id="'.$id.'" name="'.$name.'" data-accept_bad_syntax="true" spellcheck="false" class="maxima"';
+   if ($mode eq 'numeric') {
+      $output.=' data-constants="c, pi, e, hbar, amu" data-unit_mode="true"';
+   }
+   $output.='>'.$default.'</textarea></div>';
+   return $output;
 }
 
 # ==== Generate a select field
 #
 sub selectfield {
    my ($id,$name,$values,$choices,$default,$onchange)=@_;
-   $default=~s/[^\w\|]//gs;
    unless ($default) {
       $default=$screen_form_defaults->{$id};
    }
@@ -171,7 +201,7 @@ sub selectfield {
    }
    my $selectfield='<select class="lcformselectinput" id="'.$id.'" name="'.$name.'"'.$changecall.'>';
    for (my $i=0;$i<=$#{$values};$i++) {
-          $selectfield.='<option value="'.$values->[$i].'"'.($values->[$i]=~/$default/?' selected="selected"':'').'>'.
+          $selectfield.='<option value="'.$values->[$i].'"'.($values->[$i]=~/^($default)$/?' selected="selected"':'').'>'.
                          $choices->[$i].'</option>';
    }
    $selectfield.='</select>';
@@ -191,6 +221,21 @@ sub hidden_label_selectfield {
 sub hidden_label {
    my ($id,$description)=@_;
    return  '<label for="'.$id.'" class="hidden">'.&mt($description).'</label>';
+}
+
+# ==== Hidden field
+#
+sub hidden_field {
+   my ($id,$value,$name)=@_;
+   unless ($name) { $name=$id; }
+   return "<input type='hidden' id='$id' name='$name' value='".&Apache::lc_xml_utils::form_escape($value)."' />";
+}
+
+# ==== Turn a hash into hidden fields
+#
+sub hidden_vars {
+   my (%content)=@_;
+   return join("\n",map { &hidden_field($_,$content{$_},$_) } keys(%content));
 }
 
 # ==== File upload
@@ -219,6 +264,7 @@ sub datetimefield {
                     ->set_time_zone($timezone);
    my $f=DateTime::Format::RFC3339->new();
    my $time_zone  = $dt->time_zone_short_name();
+   my $time_zone_long = $dt->time_zone_long_name();
    my $seconds    = $dt->second();
    my $minutes    = $dt->minute();
    my $twentyfour = $dt->hour();
@@ -227,7 +273,7 @@ sub datetimefield {
    my $year       = $dt->year();
 # The date field
    my $dateid=$id.'_date';
-   my $datename=$name.'_name';
+   my $datename=$name.'_date';
    my $lang=&mt('language_code');
    if ($lang eq 'en') { $lang=''; }
    my $short_locale=&mt('date_short_locale');
@@ -267,7 +313,7 @@ sub datetimefield {
          $output.=&hidden_label_selectfield($id.'_time_ampm',$name.'_time_ampm',['am','pm'],[$am,$pm],$ampm,'Before/after midday');
       }
    }
-   $output.=$time_zone."</time></fieldset>";
+   $output.=&hidden_field($id.'_time_zone',$time_zone_long).$time_zone."</time></fieldset>";
    return $output;
 }
 
@@ -300,6 +346,7 @@ sub end_lcspreadsheetassign_html {
       push(@{$values},$option->{'value'});
       push(@{$choices},&mt($option->{'label'}));
    }
+# Go through all worksheets
    foreach my $worksheet (keys(%{$sheets})) {
       unless (($sheets->{$worksheet}->{'col_max'}>1) && ($sheets->{$worksheet}->{'row_max'}>1)) {
         $output.='<p>'.
@@ -307,6 +354,7 @@ sub end_lcspreadsheetassign_html {
                'The spreadsheet may have been misinterpreted. Please make sure your file has the proper extension (e.g., ".xls") or try another format.').
                '</p>';
       }
+# Start a new table for each worksheet
       $output.='<table><thead class="lcsorttablehead"><tr><th colspan="2">'.$worksheet.'</th></tr><tr><th>'.&mt('Sample Entries').'</th><th>'.&mt('Assignment').
                '</th></tr></thead><tbody class="lcsorttablebody">';
       foreach my $col ($sheets->{$worksheet}->{'col_min'} .. $sheets->{$worksheet}->{'col_max'}) {
@@ -321,7 +369,7 @@ sub end_lcspreadsheetassign_html {
          }
          $output.="</pre></td><td>\n";
          my $default='nothing';
-         my $id="col$col";
+         my $id=&Apache::lc_xml_utils::form_escape($worksheet.'c'.$col);
          if ($screen_form_defaults->{$id}) {
             $default=$screen_form_defaults->{$id};
          }
@@ -330,6 +378,7 @@ sub end_lcspreadsheetassign_html {
       }
       $output.='</tbody></table>';
    }
+   $output.=&hidden_field('flush_associations',1);
    return $output;
 }
 

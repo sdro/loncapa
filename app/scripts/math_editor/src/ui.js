@@ -19,24 +19,24 @@ through which recipients can access the Corresponding Source.
 */
 
 /*
-  This script looks for elements with the "maxima" class, and
+  This script looks for elements with the "math" class, and
   adds a preview div afterward which is updated automatically.
 */
 
-var handleChange = function(maxima_object) {
-    // maxima_object has 3 fields: ta, output_div, oldtxt
+var handleChange = function(math_object) {
+    // math_object has 3 fields: ta, output_div, oldtxt
     // we need to pass this object instead of the values because oldtxt will change
     var ta, output_div, txt, parser, output, root;
-    ta = maxima_object.ta;
-    output_div = maxima_object.output_div;
+    ta = math_object.ta;
+    output_div = math_object.output_div;
     txt = ta.value;
-    if (txt != maxima_object.oldtxt) {
-        maxima_object.oldtxt = txt;
+    if (txt != math_object.oldtxt) {
+        math_object.oldtxt = txt;
         while (output_div.firstChild != null)
             output_div.removeChild(output_div.firstChild);
         output_div.removeAttribute("title");
         if (txt != "") {
-            parser = maxima_object.parser;
+            parser = math_object.parser;
             try {
                 root = parser.parse(txt);
                 if (root != null) {
@@ -53,7 +53,7 @@ var handleChange = function(maxima_object) {
                     output_div.appendChild(document.createTextNode(txt.substring(0, e.from)));
                     var span = document.createElement('span');
                     span.appendChild(document.createTextNode(txt.substring(e.from, e.to + 1)));
-                    span.className = 'maxima-error';
+                    span.className = 'math-error';
                     output_div.appendChild(span);
                     if (e.to < txt.length - 1) {
                         output_div.appendChild(document.createTextNode(txt.substring(e.to + 1)));
@@ -68,35 +68,37 @@ var handleChange = function(maxima_object) {
 }
 
 window.addEventListener('load', function(e) {
-    var maxima_objects = [];
-    var maxima_inputs = document.getElementsByClassName('maxima');
-    for (var i=0; i<maxima_inputs.length; i++) {
-        var ta = maxima_inputs[i];
-        var output_div = document.createElement("div");
-        if (ta.nextSibling)
-            ta.parentNode.insertBefore(output_div, ta.nextSibling);
-        else
-            ta.parentNode.appendChild(output_div);
-        var accept_bad_syntax = (ta.getAttribute("data-accept_bad_syntax") === "true");
-        var unit_mode = (ta.getAttribute("data-unit_mode") === "true");
-        var constants = ta.getAttribute("data-constants");
-        if (constants)
-            constants = constants.split(/[\s,]+/);
-        var oldtxt = "";
-        maxima_objects[i] = {
-            "ta": ta,
-            "output_div": output_div,
-            "oldtxt": oldtxt,
-            "parser": new Parser(accept_bad_syntax, unit_mode, constants)
-        };
-        var changeObjectN = function(n) {
-            return function(e) { handleChange(maxima_objects[n]); };
+    var math_objects = [];
+    var math_inputs = document.getElementsByClassName('math');
+    for (var i=0; i<math_inputs.length; i++) {
+        var ta = math_inputs[i];
+        if (ta.nodeName == "TEXTAREA" || ta.nodeName == "INPUT") {
+            var output_div = document.createElement("div");
+            if (ta.nextSibling)
+                ta.parentNode.insertBefore(output_div, ta.nextSibling);
+            else
+                ta.parentNode.appendChild(output_div);
+            var implicit_operators = (ta.getAttribute("data-implicit_operators") === "true");
+            var unit_mode = (ta.getAttribute("data-unit_mode") === "true");
+            var constants = ta.getAttribute("data-constants");
+            if (constants)
+                constants = constants.split(/[\s,]+/);
+            var oldtxt = "";
+            math_objects[i] = {
+                "ta": ta,
+                "output_div": output_div,
+                "oldtxt": oldtxt,
+                "parser": new Parser(implicit_operators, unit_mode, constants)
+            };
+            var changeObjectN = function(n) {
+                return function(e) { handleChange(math_objects[n]); };
+            }
+            var startChange = changeObjectN(i);
+            if (ta.value != oldtxt)
+                startChange();
+            ta.addEventListener('change', startChange , false);
+            ta.addEventListener('keyup', startChange , false);
         }
-        var startChange = changeObjectN(i);
-        if (ta.value != oldtxt)
-            startChange();
-        ta.addEventListener('change', startChange , false);
-        ta.addEventListener('keyup', startChange , false);
     }
     
 }, false);

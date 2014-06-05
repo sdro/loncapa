@@ -21,15 +21,15 @@ through which recipients can access the Corresponding Source.
 /**
  * Equation parser
  * @constructor
- * @param {boolean} [accept_bad_syntax] - assume hidden multiplication operators in some cases (unlike maxima)
+ * @param {boolean} [implicit_operators] - assume hidden multiplication and unit operators in some cases (unlike maxima)
  * @param {boolean} [unit_mode] - handle only numerical expressions with units (no variable)
  * @param {Array.<string>} [constants] - array of constant names for unit mode
  */
-function Parser(accept_bad_syntax, unit_mode, constants) {
-    if (typeof accept_bad_syntax == "undefined")
-        this.accept_bad_syntax = false;
+function Parser(implicit_operators, unit_mode, constants) {
+    if (typeof implicit_operators == "undefined")
+        this.implicit_operators = false;
     else
-        this.accept_bad_syntax = accept_bad_syntax;
+        this.implicit_operators = implicit_operators;
     if (typeof unit_mode == "undefined")
         this.unit_mode = false;
     else
@@ -127,17 +127,18 @@ Parser.prototype.addHiddenOperators = function() {
                 (token.type == Token.NAME && next_token.type == Token.NAME) ||
                 (token.type == Token.NUMBER && next_token.type == Token.NAME) ||
                 (token.type == Token.NUMBER && next_token.type == Token.NUMBER) ||
-                (token.type == Token.NUMBER && next_token.value == "(") ||
+                (token.type == Token.NUMBER && (next_token.value == "(" || next_token.value == "[")) ||
                 /*(token.type == Token.NAME && next_token.value == "(") ||*/
                 /* name ( could be a function call */
-                (token.value == ")" && next_token.type == Token.NAME) ||
-                (token.value == ")" && next_token.type == Token.NUMBER) ||
-                (token.value == ")" && next_token.value == "(")
+                ((token.value == ")" || token.value == "]") && next_token.type == Token.NAME) ||
+                ((token.value == ")" || token.value == "]") && next_token.type == Token.NUMBER) ||
+                ((token.value == ")" || token.value == "]") && next_token.value == "(")
            ) {
             // support for things like "(1/2) (m/s)" is complex...
-            var units = (this.unit_mode && !in_units && (token.type == Token.NUMBER || token.value == ")") &&
+            var units = (this.unit_mode && !in_units && (token.type == Token.NUMBER ||
+                (token.value == ")" || token.value == "]")) &&
                 (next_token.type == Token.NAME ||
-                    (next_token.value == "(" && this.tokens.length > i + 2 &&
+                    ((next_token.value == "(" || next_token.value == "[") && this.tokens.length > i + 2 &&
                     this.tokens[i + 2].type == Token.NAME)));
             if (units) {
                 var test_token, index_test;
@@ -156,9 +157,11 @@ Parser.prototype.addHiddenOperators = function() {
                     }
                 }
                 if (this.tokens.length > index_test + 1 && this.tokens[index_test + 1].value == "(") {
-                    var known_functions = ["sqrt", "abs", "exp", "factorial", "diff",
+                    var known_functions = ["pow", "sqrt", "abs", "exp", "factorial", "diff",
                         "integrate", "sum", "product", "limit", "binomial", "matrix",
-                        "ln", "log", "log10"];
+                        "ln", "log", "log10", "mod", "signum", "ceiling", "floor",
+                        "sin", "cos", "tan", "asin", "acos", "atan", "atan2",
+                        "sinh", "cosh", "tanh", "asinh", "acosh", "atanh"];
                     for (var j=0; j<known_functions.length; j++) {
                         if (test_token.value == known_functions[j]) {
                             units = false;
@@ -192,7 +195,7 @@ Parser.prototype.parse = function(text) {
     if (this.tokens.length == 0) {
         return null;
     }
-    if (this.accept_bad_syntax) {
+    if (this.implicit_operators) {
         this.addHiddenOperators();
     }
     this.token_nr = 0;

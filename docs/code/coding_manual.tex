@@ -1,0 +1,27 @@
+\documentclass{book}
+\usepackage[top=1.5cm, bottom=1.5cm, left=1cm, right=1cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\makeindex
+\begin{document}
+\pagestyle{headings}
+\pagenumbering{roman}
+\title{LON-CAPA Next Generation Code Manual}
+\author{LON-CAPA Consortium}
+\date{\today}
+\maketitle
+\tableofcontents
+\pagenumbering{arabic}
+\include{license}
+\include{requirements}
+\include{urltranslation}
+\include{network}
+\include{entities}
+\include{authorization}
+\include{storage}
+\include{xmlparser}
+\include{internationalization}
+\include{math}
+\include{glossary}
+\input{coding_manual.ind}
+\end{document}
